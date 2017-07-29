@@ -73,4 +73,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Compiled directory ignored
+build
+
 # End of https://www.gitignore.io/api/c++,cmake,macos
