@@ -40,44 +40,45 @@ int main(int argc, char *argv[])
 
 	Chain kdlChain = Chain();
 
-	Joint joint1(Joint::RotZ);
+	Joint joint1(Joint::RotY);
 	Frame frame1 = Frame(Vector(0.0, 0.1, 0.0));
 	kdlChain.addSegment(Segment(joint1, frame1));
 
 	Joint joint2(Joint::RotZ);
-  Frame frame2 = Frame(Rotation::EulerZYX(0.0, 0.0, M_PI / 2)) *
-    Frame(Vector(0.0, 0.0, 0.1));
+	Frame frame2 = Frame(Vector(0.0, 0.1, 0.0));
 	kdlChain.addSegment(Segment(joint2, frame2));
 
 	Joint joint3(Joint::RotZ);
-  Frame frame3 = Frame(Rotation::EulerZYX(0.0, 0.0, M_PI / 2)) *
-    Frame(Vector(0.0, 0.0, 0.1));
+	Frame frame3 = Frame(Vector(0.0, 0.1, 0.0));
 	kdlChain.addSegment(Segment(joint3, frame3));
 
-	Joint joint4(Joint::RotZ);
+	Joint joint4(Joint::RotY);
 	Frame frame4 = Frame(Vector(0.0, 0.1, 0.0));
 	kdlChain.addSegment(Segment(joint4, frame4));
 
 	Joint joint5(Joint::RotZ);
-  Frame frame5 = Frame(Rotation::EulerZYX(0.0, 0.0, M_PI / 2)) *
-    Frame(Vector(0.0, 0.0, 0.1));
+	Frame frame5 = Frame(Vector(0.0, 0.1, 0.0));
 	kdlChain.addSegment(Segment(joint5, frame5));
 
-	Joint joint6(Joint::RotZ);
-	Frame frame6 = Frame(Vector(0.0, 0.1, 0.0));
-	kdlChain.addSegment(Segment(joint6, frame6));
+	// Joint joint6(Joint::RotY);
+	// Frame frame6 = Frame(Vector(0.0, 0.1, 0.0));
+	// kdlChain.addSegment(Segment(joint6, frame6));
 
 	//
 	// Joint Angles
 	//
   unsigned int nj = kdlChain.getNrOfJoints();
+	JntArray jointInitAngles = JntArray(nj);
+  for(int i; i<nj; i++)
+    jointInitAngles(i) = 0;
+
 	JntArray jointAngles = JntArray(nj);
-	jointAngles(0) = 0;//M_PI / 6.;       // Joint 1
+	jointAngles(0) = M_PI / 2.;       // Joint 1
 	jointAngles(1) = 0;//M_PI / 3.;       // Joint 2
-	jointAngles(2) = 0;      // Joint 3
-	jointAngles(3) = 0;//M_PI / 6.;       // Joint 4
-	jointAngles(4) = 0;       // Joint 5
-	jointAngles(5) = 0;//-M_PI / 6.;      // Joint 6
+	jointAngles(2) = 0;//M_PI / 6.;      // Joint 3
+  jointAngles(3) = 0;//M_PI / 6.;       // Joint 4
+  jointAngles(4) = M_PI / 2.;       // Joint 5
+	// jointAngles(5) = 0;//-M_PI / 6.;      // Joint 6
 
 	//
 	// Perform Forward Kinematics
@@ -86,15 +87,29 @@ int main(int argc, char *argv[])
   std::cout << "/**********Forward kinematics**********/" << std::endl;
 	ChainFkSolverPos_recursive FKSolver = ChainFkSolverPos_recursive(kdlChain);
 	Frame eeFrame;
+	// Calculate and print the init frame
+	FKSolver.JntToCart(jointInitAngles, eeFrame);
+  std::cout << "Rotational Matrix of the init Frame:" << std::endl;
+	for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 4; j++) {
+			double a = eeFrame(i, j);
+			if (a < 0.0001 && a > -0.001) {
+				a = 0.0;
+			}
+			std::cout << std::setprecision(4) << a << "\t\t";
+		}
+		std::cout << std::endl;
+	}
+
+	// Calculate and print the final frame
 	FKSolver.JntToCart(jointAngles, eeFrame);
   std::cout << "Desired Angles:\n";
-  for(int i=0; i<6-1; i++)
+  for(int i=0; i<nj-1; i++)
   {
     std::cout << jointAngles(i)*(180/M_PI) << "\t\t";
   }
-  std::cout << jointAngles(6-1)*(180/M_PI) << std::endl;
+  std::cout << jointAngles(nj-1)*(180/M_PI) << std::endl;
 
-	// Print the frame
   std::cout << "Rotational Matrix of the final Frame:" << std::endl;
 	for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 4; j++) {
@@ -111,23 +126,44 @@ int main(int argc, char *argv[])
 	// Perform Inverse Kinematics
 	//
 
-  // std::cout << "/**********Inverse kinematics**********/" << std::endl;
-  // JntArray q_init = JntArray(3);
-  // q_init = jointAngles;
+  std::cout << "/**********Inverse kinematics**********/" << std::endl;
+  JntArray q_init = JntArray(nj);
+  q_init = jointInitAngles;
+  std::cout << "Init Angles:\n";
+  for(int i=0; i<nj-1; i++)
+  {
+    std::cout << q_init(i)*(180/M_PI) << "\t\t";
+  }
+  std::cout << q_init(nj-1)*(180/M_PI) << std::endl;
 
-	// ChainFkSolverPos_recursive fk(kdlChain);
-  // ChainIkSolverVel_pinv vik(kdlChain);
-  // ChainIkSolverPos_NR ik(kdlChain, fk, vik);
+  ChainFkSolverPos_recursive fk(kdlChain);
+  ChainIkSolverVel_pinv vik(kdlChain);
+  ChainIkSolverPos_NR ik(kdlChain, fk, vik, 1000, 1e-6); //Maximum 100 iterations, stop at accuracy 1e-6
 
-  // Frame desiredFrame = Frame(Vector(0.4, 0.4, 0));
-  // std::cout << "Desired Position:\n" << desiredFrame.p(0) << "\t\t" << desiredFrame.p(1)
-    // << "\t\t" << desiredFrame.p(2) << std::endl;
+  // https://wenku.baidu.com/view/ef930264453610661ed9f4f9.html
+  Frame desiredFrame = Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 0.4, 0.1));
+  std::cout << "Desired Position:" << std::endl;
+	for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 4; j++) {
+			double a = desiredFrame(i, j);
+			if (a < 0.0001 && a > -0.001) {
+				a = 0.0;
+			}
+			std::cout << std::setprecision(4) << a << "\t\t";
+		}
+		std::cout << std::endl;
+	}
 
-  // JntArray q_out = JntArray(3);
-  // ik.CartToJnt(q_init, desiredFrame, q_out);
+  // https://git.physik3.gwdg.de/CNS/skynet_ros/raw/8f1ff07a1159846771a8e47e23a10c14bfbcd9ab/src/orocos_kdl/tests/solvertest.cpp
+  JntArray q_out = JntArray(nj);
+  ik.CartToJnt(q_init, desiredFrame, q_out);
 
-  // std::cout << "Output Angles:\n" << q_out(0)*(180/M_PI) << "\t\t" << q_out(1)*(180/M_PI)
-    // << "\t\t" << q_out(2)*(180/M_PI) << std::endl;
+  std::cout << "Output Angles:\n";
+  for(int i=0; i<nj-1; i++)
+  {
+    std::cout << q_out(i)*(180/M_PI) << "\t\t";
+  }
+  std::cout << q_out(nj-1)*(180/M_PI) << std::endl;
 
 	return 0;
 }
