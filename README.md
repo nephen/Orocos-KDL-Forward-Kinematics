@@ -9,7 +9,7 @@ mkdir build
 cd build
 cmake ..
 make
-./SimpleRobotFK
+./SimpleRobotFK 90 0 0 0 90
 ```
 
 Output:
