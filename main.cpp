@@ -21,6 +21,8 @@
  */
 #include <iostream>
 #include <iomanip>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
@@ -74,12 +76,31 @@ int main(int argc, char *argv[])
     jointInitAngles(i) = 0;
 
 	JntArray jointAngles = JntArray(nj);
-	jointAngles(0) = M_PI / 2.;       // Joint 1
-	jointAngles(1) = 0;//M_PI / 3.;       // Joint 2
-	jointAngles(2) = 0;//M_PI / 6.;      // Joint 3
-  jointAngles(3) = 0;//M_PI / 6.;       // Joint 4
-  jointAngles(4) = M_PI / 2.;       // Joint 5
+  // jointAngles(0) = M_PI / 2.;       // Joint 1
+  // jointAngles(1) = 0;//M_PI / 3.;       // Joint 2
+  // jointAngles(2) = 0;//M_PI / 6.;      // Joint 3
+  // jointAngles(3) = 0;//M_PI / 6.;       // Joint 4
+  // jointAngles(4) = M_PI / 2.;       // Joint 5
 	// jointAngles(5) = 0;//-M_PI / 6.;      // Joint 6
+
+  // Assign some values to the joint positions
+  // for(unsigned int i=0; i<nj; i++){
+    // float myinput;
+    // printf ("Enter the position of joint %i: ", i+1);
+    // scanf ("%e",&myinput);
+    // jointAngles(i) = (double)myinput*(M_PI/180);
+  // }
+
+  // eg:
+  // ./SimpleRobotFK 90 0 0 0 90
+  for(unsigned int i=1; i<nj+1; i++){
+    if(i>=argc) {
+      jointAngles(i-1) = 0.0;
+      continue;
+    }
+    printf("Argument position of joint %d is %f\n", i, atof(argv[i]));
+    jointAngles(i-1) = (double)atof(argv[i])*(M_PI/180);
+  }
 
 	//
 	// Perform Forward Kinematics
@@ -162,7 +183,13 @@ int main(int argc, char *argv[])
   std::cout << "Output Angles:\n";
   for(int i=0; i<nj-1; i++)
   {
+    if (q_out(i) < 0.0001 && q_out(i) > -0.001) {
+      q_out(i) = 0.0;
+    }
     std::cout << q_out(i)*(180/M_PI) << "\t\t";
+  }
+  if (q_out(nj-1) < 0.0001 && q_out(nj-1) > -0.001) {
+    q_out(nj-1) = 0.0;
   }
   std::cout << q_out(nj-1)*(180/M_PI) << std::endl;
 
