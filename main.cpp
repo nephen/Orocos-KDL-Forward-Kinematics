@@ -36,28 +36,29 @@ int main(int argc, char *argv[])
 	//
 	// A Chain is made up of Segments. Each Segment consists of a Joint and a Frame.
 	// The Joint indicates how the Frame moves - rotation or translation about / along an axis.
+  // Reference: RobotAnno-V5 dimension parameter of robot arm v1.0(with clip).pdf
 	//
 
 	Chain kdlChain = Chain();
 
 	Joint joint1(Joint::RotY);
-	Frame frame1 = Frame(Vector(0.0, 0.1, 0.0));
+	Frame frame1 = Frame(Vector(0.0, 274.0, 0.0));
 	kdlChain.addSegment(Segment(joint1, frame1));
 
 	Joint joint2(Joint::RotZ);
-	Frame frame2 = Frame(Vector(0.0, 0.1, 0.0));
+	Frame frame2 = Frame(Vector(0.0, 221.1, 0.0));
 	kdlChain.addSegment(Segment(joint2, frame2));
 
 	Joint joint3(Joint::RotZ);
-	Frame frame3 = Frame(Vector(0.0, 0.1, 0.0));
+	Frame frame3 = Frame(Vector(0.0, 117.4, 0.0));
 	kdlChain.addSegment(Segment(joint3, frame3));
 
 	Joint joint4(Joint::RotY);
-	Frame frame4 = Frame(Vector(0.0, 0.1, 0.0));
+	Frame frame4 = Frame(Vector(0.0, 105.1, 0.0));
 	kdlChain.addSegment(Segment(joint4, frame4));
 
 	Joint joint5(Joint::RotZ);
-	Frame frame5 = Frame(Vector(0.0, 0.1, 0.0));
+	Frame frame5 = Frame(Vector(0.0, 129.5, 0.0));
 	kdlChain.addSegment(Segment(joint5, frame5));
 
 	// Joint joint6(Joint::RotY);
@@ -141,7 +142,7 @@ int main(int argc, char *argv[])
   ChainIkSolverPos_NR ik(kdlChain, fk, vik, 1000, 1e-6); //Maximum 100 iterations, stop at accuracy 1e-6
 
   // https://wenku.baidu.com/view/ef930264453610661ed9f4f9.html
-  Frame desiredFrame = Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 0.4, 0.1));
+  Frame desiredFrame = Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 717.6, 129.5));
   std::cout << "Desired Position:" << std::endl;
 	for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 4; j++) {
