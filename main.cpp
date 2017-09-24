@@ -98,7 +98,9 @@ int main(int argc, char *argv[])
       jointAngles(i-1) = 0.0;
       continue;
     }
+#ifdef DEBUG
     printf("Argument position of joint %d is %f\n", i, atof(argv[i]));
+#endif
     jointAngles(i-1) = (double)atof(argv[i])*(M_PI/180);
   }
 
@@ -106,11 +108,14 @@ int main(int argc, char *argv[])
   // Perform Forward Kinematics
   //
 
+#ifdef DEBUG
   std::cout << "/**********Forward kinematics**********/" << std::endl;
+#endif
   ChainFkSolverPos_recursive FKSolver = ChainFkSolverPos_recursive(kdlChain);
   Frame eeFrame;
   // Calculate and print the init frame
   FKSolver.JntToCart(jointInitAngles, eeFrame);
+#ifdef DEBUG
   std::cout << "Rotational Matrix of the init Frame:" << std::endl;
   for (int i = 0; i < 4; i++){
     for (int j = 0; j < 4; j++) {
@@ -122,9 +127,11 @@ int main(int argc, char *argv[])
     }
     std::cout << std::endl;
   }
+#endif
 
   // Calculate and print the final frame
   FKSolver.JntToCart(jointAngles, eeFrame);
+#ifdef DEBUG
   std::cout << "Desired Angles:\n";
   for(int i=0; i<nj-1; i++)
   {
@@ -143,20 +150,36 @@ int main(int argc, char *argv[])
     }
     std::cout << std::endl;
   }
+#else
+  for (int i = 0; i < 3; i++){
+    double a = eeFrame(i, 3);
+    if (a < 0.0001 && a > -0.001) {
+      a = 0.0;
+    }
+    std::cout << std::setprecision(4) << a;
+    if(i < 2)
+      std::cout << ",";
+  }
+  std::cout << std::endl;
+#endif
 
+#ifdef DEBUG
   //
   // Perform Inverse Kinematics
   //
 
   std::cout << "/**********Inverse kinematics**********/" << std::endl;
+#endif
   JntArray q_init = JntArray(nj);
   q_init = jointInitAngles;
+#ifdef DEBUG
   std::cout << "Init Angles:\n";
   for(int i=0; i<nj-1; i++)
   {
     std::cout << q_init(i)*(180/M_PI) << "\t\t";
   }
   std::cout << q_init(nj-1)*(180/M_PI) << std::endl;
+#endif
 
   ChainFkSolverPos_recursive fk(kdlChain);
   ChainIkSolverVel_pinv vik(kdlChain);
@@ -164,6 +187,7 @@ int main(int argc, char *argv[])
 
   // https://wenku.baidu.com/view/ef930264453610661ed9f4f9.html
   Frame desiredFrame = Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 717.6, 129.5));
+#ifdef DEBUG
   std::cout << "Desired Position:" << std::endl;
   for (int i = 0; i < 4; i++){
     for (int j = 0; j < 4; j++) {
@@ -175,11 +199,13 @@ int main(int argc, char *argv[])
     }
     std::cout << std::endl;
   }
+#endif
 
   // https://git.physik3.gwdg.de/CNS/skynet_ros/raw/8f1ff07a1159846771a8e47e23a10c14bfbcd9ab/src/orocos_kdl/tests/solvertest.cpp
   JntArray q_out = JntArray(nj);
   ik.CartToJnt(q_init, desiredFrame, q_out);
 
+#ifdef DEBUG
   std::cout << "Output Angles:\n";
   for(int i=0; i<nj-1; i++)
   {
@@ -192,6 +218,7 @@ int main(int argc, char *argv[])
     q_out(nj-1) = 0.0;
   }
   std::cout << q_out(nj-1)*(180/M_PI) << std::endl;
+#endif
 
   return 0;
 }
