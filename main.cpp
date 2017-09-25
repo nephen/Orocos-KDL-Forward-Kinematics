@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
     printf("Argument position of joint %d is %f\n", i, atof(argv[i]));
 #endif
+    //if calc ik, should first set jointAngle to 0 0 -90 0 -90
     jointAngles(i-1) = (double)atof(argv[i])*(M_PI/180);
   }
 
@@ -223,7 +224,8 @@ int main(int argc, char *argv[])
 #endif
 
   std::cout << "/**********Second Inverse kinematics**********/" << std::endl;
-  q_init = jointInitAngles;
+  // calc joint angles according real time coordinate us ik
+  q_init = q_out;//jointAngles;//jointInitAngles;
 #ifdef DEBUG
   std::cout << "Init Second Angles:\n";
   for(int i=0; i<nj-1; i++)
@@ -232,7 +234,8 @@ int main(int argc, char *argv[])
   }
   std::cout << q_init(nj-1)*(180/M_PI) << std::endl;
 #endif
-  desiredFrame = Frame(eeFrame.M,Vector(eeFrame.p[0]+40, eeFrame.p[1], eeFrame.p[2]));
+  // desiredFrame is set by current position(real time coordinate) slightly offset
+  desiredFrame = Frame(eeFrame.M,Vector(eeFrame.p[0]+50, eeFrame.p[1]-200, eeFrame.p[2]));
 #ifdef DEBUG
   std::cout << "Desired Second Position:" << std::endl;
   for (int i = 0; i < 4; i++){
