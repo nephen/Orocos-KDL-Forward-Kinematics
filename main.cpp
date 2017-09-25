@@ -29,6 +29,8 @@
 #include <kdl/chainiksolverpos_nr.hpp>
 #include <kdl/chainiksolvervel_pinv.hpp>
 
+#define DEBUG
+
 using namespace KDL;
 
 int main(int argc, char *argv[])
@@ -186,7 +188,7 @@ int main(int argc, char *argv[])
   ChainIkSolverPos_NR ik(kdlChain, fk, vik, 1000, 1e-6); //Maximum 100 iterations, stop at accuracy 1e-6
 
   // https://wenku.baidu.com/view/ef930264453610661ed9f4f9.html
-  Frame desiredFrame = Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 717.6, 129.5));
+  Frame desiredFrame = eeFrame;//Frame(Rotation::RPY(M_PI/2.0, 0.0, M_PI/2), Vector(0, 717.6, 129.5));
 #ifdef DEBUG
   std::cout << "Desired Position:" << std::endl;
   for (int i = 0; i < 4; i++){
@@ -218,6 +220,48 @@ int main(int argc, char *argv[])
     q_out(nj-1) = 0.0;
   }
   std::cout << q_out(nj-1)*(180/M_PI) << std::endl;
+#endif
+
+  std::cout << "/**********Second Inverse kinematics**********/" << std::endl;
+  q_init = jointInitAngles;
+#ifdef DEBUG
+  std::cout << "Init Second Angles:\n";
+  for(int i=0; i<nj-1; i++)
+  {
+    std::cout << q_init(i)*(180/M_PI) << "\t\t";
+  }
+  std::cout << q_init(nj-1)*(180/M_PI) << std::endl;
+#endif
+  desiredFrame = Frame(eeFrame.M,Vector(eeFrame.p[0]+40, eeFrame.p[1], eeFrame.p[2]));
+#ifdef DEBUG
+  std::cout << "Desired Second Position:" << std::endl;
+  for (int i = 0; i < 4; i++){
+    for (int j = 0; j < 4; j++) {
+      double a = desiredFrame(i, j);
+      if (a < 0.0001 && a > -0.001) {
+        a = 0.0;
+      }
+      std::cout << std::setprecision(4) << a << "\t\t";
+    }
+    std::cout << std::endl;
+  }
+#endif
+  JntArray q_out_2 = JntArray(nj);
+  ik.CartToJnt(q_init, desiredFrame, q_out_2);
+
+#ifdef DEBUG
+  std::cout << "Output Second Angles:\n";
+  for(int i=0; i<nj-1; i++)
+  {
+    if (q_out_2(i) < 0.0001 && q_out_2(i) > -0.001) {
+      q_out_2(i) = 0.0;
+    }
+    std::cout << q_out_2(i)*(180/M_PI) << "\t\t";
+  }
+  if (q_out_2(nj-1) < 0.0001 && q_out_2(nj-1) > -0.001) {
+    q_out_2(nj-1) = 0.0;
+  }
+  std::cout << q_out_2(nj-1)*(180/M_PI) << std::endl;
 #endif
 
   return 0;
