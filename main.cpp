@@ -29,7 +29,9 @@
 #include <kdl/chainiksolverpos_nr.hpp>
 #include <kdl/chainiksolvervel_pinv.hpp>
 
-#define DEBUG
+// #define DEBUG
+// #define FK_TEST
+#define IK_TEST
 
 using namespace KDL;
 
@@ -154,7 +156,8 @@ int main(int argc, char *argv[])
     }
     std::cout << std::endl;
   }
-#else
+#endif
+#ifdef FK_TEST
   for (int i = 0; i < 3; i++){
     double a = eeFrame(i, 3);
     if (a < 0.0001 && a > -0.001) {
@@ -224,9 +227,13 @@ int main(int argc, char *argv[])
   std::cout << q_out(nj-1)*(180/M_PI) << std::endl;
 #endif
 
+#ifdef DEBUG
   std::cout << "/**********Second Inverse kinematics**********/" << std::endl;
+#endif
+
   // calc joint angles according real time coordinate us ik
-  q_init = q_out;//jointAngles;//jointInitAngles;
+  // q_init = q_out;//jointAngles;//jointInitAngles;
+  q_init = jointInitAngles;
 #ifdef DEBUG
   std::cout << "Init Second Angles:\n";
   for(int i=0; i<nj-1; i++)
@@ -258,6 +265,20 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
   std::cout << "Output Second Angles:\n";
+  for(int i=0; i<nj-1; i++)
+  {
+    if (q_out_2(i) < 0.0001 && q_out_2(i) > -0.001) {
+      q_out_2(i) = 0.0;
+    }
+    std::cout << q_out_2(i)*(180/M_PI) << "\t\t";
+  }
+  if (q_out_2(nj-1) < 0.0001 && q_out_2(nj-1) > -0.001) {
+    q_out_2(nj-1) = 0.0;
+  }
+  std::cout << q_out_2(nj-1)*(180/M_PI) << std::endl;
+#endif
+
+#ifdef IK_TEST
   for(int i=0; i<nj-1; i++)
   {
     if (q_out_2(i) < 0.0001 && q_out_2(i) > -0.001) {
