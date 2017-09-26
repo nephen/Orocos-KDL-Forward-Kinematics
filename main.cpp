@@ -95,16 +95,17 @@ int main(int argc, char *argv[])
 
   // eg:
   // ./SimpleRobotFK 90 0 0 0 90
-  for(unsigned int i=1; i<nj+1; i++){
-    if(i>=argc) {
-      jointAngles(i-1) = 0.0;
+  unsigned int argnum=1;
+  for(unsigned int argnum=1; argnum<nj+1; argnum++){
+    if(argnum>=argc) {
+      jointAngles(argnum-1) = 0.0;
       continue;
     }
 #ifdef DEBUG
-    printf("Argument position of joint %d is %f\n", i, atof(argv[i]));
+    printf("Argument position of joint %d is %f\n", argnum, atof(argv[argnum]));
 #endif
     //if calc ik, should first set jointAngle to 0 0 -90 0 -90
-    jointAngles(i-1) = (double)atof(argv[i])*(M_PI/180);
+    jointAngles(argnum-1) = (double)atof(argv[argnum])*(M_PI/180);
   }
 
   //
@@ -235,7 +236,10 @@ int main(int argc, char *argv[])
   std::cout << q_init(nj-1)*(180/M_PI) << std::endl;
 #endif
   // desiredFrame is set by current position(real time coordinate) slightly offset
-  desiredFrame = Frame(eeFrame.M,Vector(eeFrame.p[0]+50, eeFrame.p[1]-200, eeFrame.p[2]));
+  argnum = 8;//any questions!
+  desiredFrame = Frame(eeFrame.M,Vector(eeFrame.p[0]+(double)atof(argv[argnum--]),
+                                        eeFrame.p[1]+(double)atof(argv[argnum--]),
+                                        eeFrame.p[2]+(double)atof(argv[argnum--])));
 #ifdef DEBUG
   std::cout << "Desired Second Position:" << std::endl;
   for (int i = 0; i < 4; i++){

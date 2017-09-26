@@ -4,5 +4,5 @@ project (FK_KDL_Tutorial)
 find_package (orocos_kdl REQUIRED)
 include_directories (${orocos_kdl_INCLUDE_DIRS})
 
-add_executable (SimpleRobotFK main.cpp)
-target_link_libraries (SimpleRobotFK ${orocos_kdl_LIBRARIES})
+add_executable (SimpleRobotIK main.cpp)
+target_link_libraries (SimpleRobotIK ${orocos_kdl_LIBRARIES})
